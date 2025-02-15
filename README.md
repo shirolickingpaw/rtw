@@ -1,0 +1,2 @@
+- manage dependencies with vcpkg
+- build with cmake
