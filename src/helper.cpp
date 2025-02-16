@@ -13,6 +13,10 @@ double degrees_to_radian(double degrees) {
     return degrees * arma::datum::pi/180;
 }
 
+double random_double() {
+    return random_double(0, 1);
+}
+
 double random_double(double min, double max) {
     std::random_device rd;
     std::mt19937 gen(rd());

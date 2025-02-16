@@ -9,3 +9,4 @@ arma::vec3 cross(const arma::vec3& u, const arma::vec3& v);
 arma::vec3 random_in_unit_disk();
 double random_double(double min, double max);
 double degrees_to_radian(double degrees);
+double random_double();
