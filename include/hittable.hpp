@@ -2,13 +2,22 @@
 #define HITTABLE_HPP
 
 #include <armadillo>
+#include <memory>
+#include <vector>
 #include "ray.hpp"
+#include "material.hpp"
 #include "interval.hpp"
+
+using std::make_shared;
+using std::shared_ptr;
+
+class material;
 
 class hit_record {
     public:
         arma::vec3 p;
         arma::vec3 normal;
+        shared_ptr<material> mat;
         double t;
         bool front_face;
         

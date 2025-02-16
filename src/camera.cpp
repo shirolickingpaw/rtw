@@ -4,6 +4,7 @@
 
 #include "ray.hpp"
 #include "camera.hpp"
+#include "material.hpp"
 
 arma::vec3 camera::ray_color(const ray& r, int depth, const hittable& world) const {
     if (depth <= 0)
@@ -12,32 +13,14 @@ arma::vec3 camera::ray_color(const ray& r, int depth, const hittable& world) con
 
     // the following code highly depend on the diffusion model you choose
     if (world.hit(r, interval(0.001, arma::datum::inf), rec)) {
-        arma::vec3 direction;
-        arma::vec3 on_unit_sphere;
-        while (true) {
-            int upper_lim = 1;
-            int lower_lim = -1;
-            // [-1, 1)
-            arma::vec3 p = lower_lim 
-                + (upper_lim-lower_lim) 
-                * arma::vec3(arma::randu<arma::vec>(3));
-
-            auto lensq = arma::dot(p,p);
-            if (1e-160 < lensq && lensq <= 1) {
-                on_unit_sphere = p/std::sqrt(lensq);
-                break;
-            }
-        }
-
-        if (arma::dot(on_unit_sphere, rec.normal) > 0.0) {
-            direction = on_unit_sphere;
-        } else {
-            direction = -on_unit_sphere;
-        }
-
-        // 0.5 here is reflectance 0.1 for a darker picture 0.9 for a lighter picture
-        return 0.5 * ray_color(ray(rec.p, direction), depth-1,  world);
+        ray scattered;
+        arma::vec3 attenuation;
+        if (rec.mat->scatter(r, rec, attenuation, scattered))
+            // % for element wise multiplication and get a third vec
+            return attenuation%ray_color(scattered, depth-1, world);
+        return arma::vec3({0,0,0});
     }
+
 
     arma::vec3 unit_direction = arma::normalise(r.direction());
     auto a = 0.5 * (unit_direction[1] + 1.0);

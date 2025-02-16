@@ -16,6 +16,7 @@ add_executable(out
     src/hittable_list.cpp
     src/camera.cpp
     src/interval.cpp
+    src/material.cpp
 )
 
 # Enable vcpkg manifest mode

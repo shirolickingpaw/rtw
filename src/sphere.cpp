@@ -2,8 +2,12 @@
 #include "sphere.hpp"
 #include <cmath>
 
-sphere::sphere(const arma::vec3& center, double radius) :
-    center(center), radius(std::fmax(0, radius)) {}
+sphere::sphere(const arma::vec3& center, 
+        double radius,
+        shared_ptr<material> mat) :
+    center(center), radius(std::fmax(0, radius)), mat(mat) {
+    // initialize mat here
+}
 
 bool sphere::hit(const ray& r,
         interval ray_t,
@@ -32,6 +36,7 @@ bool sphere::hit(const ray& r,
     rec.p = r.at(rec.t);
     arma::vec3 outward_normal = (rec.p - center)/radius;
     rec.set_face_normal(r, outward_normal);
+    rec.mat = mat;
 
     return true;
 }
