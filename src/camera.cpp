@@ -57,10 +57,9 @@ void camera::initialize() {
     center = lookfrom;
     
     // viewport dimensions
-    auto focal_length = arma::norm(lookfrom-lookat, 2);
     auto theta = vfov*arma::datum::pi/180.0;
     auto h = std::tan(theta/2);
-    auto viewport_height = 2*h*focal_length;
+    auto viewport_height = 2*h*focus_dist;
     auto viewport_width = viewport_height * (double(image_width)/image_height);
 
     w = arma::normalise(lookfrom-lookat);
@@ -77,9 +76,13 @@ void camera::initialize() {
 
     // location of upper left pixel
     auto viewport_upper_left = center 
-        - (focal_length*w) 
+        - (focus_dist*w) 
         - viewport_u/2 -viewport_v/2;
     pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+    auto defocus_radius = focus_dist*std::tan(degrees_to_radian(defocus_angle/2));
+    defocus_disk_u = u*defocus_radius;
+    defocus_disk_v = v*defocus_radius;
 }
 
 ray camera::get_ray(int i, int j) const {
@@ -88,7 +91,7 @@ ray camera::get_ray(int i, int j) const {
         + ((i + offset[0]) * pixel_delta_u)
         + ((j + offset[1]) * pixel_delta_v);
 
-    auto ray_origin = center;
+    auto ray_origin = (defocus_angle<=0) ? center: defocus_disk_sample();
     auto ray_direction = pixel_sample - ray_origin;
 
     return ray(ray_origin, ray_direction);
@@ -102,3 +105,9 @@ arma::vec3 camera::sample_square() const {
     
     return arma::vec3({random-0.5, random-0.5,0});
 }
+
+arma::vec3 camera::defocus_disk_sample() const {
+    auto p = random_in_unit_disk();
+    return center + (p[0]*defocus_disk_u) + (p[1]*defocus_disk_v);
+}
+

@@ -1,6 +1,26 @@
 #include "helper.hpp"
 #include <cmath>
 
+arma::vec3 random_in_unit_disk() {
+    while (true) {
+        auto p = arma::vec3({random_double(-1,1), random_double(-1,1), 0});
+        if (arma::dot(p,p) < 1)
+            return p;
+    }
+}
+
+double degrees_to_radian(double degrees) {
+    return degrees * arma::datum::pi/180;
+}
+
+double random_double(double min, double max) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> dist(min, max);
+    return dist(gen);
+}
+
+
 arma::vec3 refract(const arma::vec3& uv, 
         const arma::vec3& n,
         double etai_over_etat) {
