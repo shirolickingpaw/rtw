@@ -14,7 +14,7 @@ add_executable(out
     src/ray.cpp
     src/sphere.cpp
     src/hittable_list.cpp
-    src/helper.cpp
+    src/camera.cpp
     src/interval.cpp
 )
 
