@@ -43,4 +43,17 @@ class metal : public material {
         double fuzz;
 };
 
+class dielectric : public material {
+    public:
+        dielectric(double refraction_index);
+
+        bool scatter(const ray& r_in,
+                const hit_record& rec,
+                arma::vec3& attenuation,
+                ray& scattered) const override;
+    private:
+        double refraction_index;
+        static double reflectance(double cosine, double refraction_index);
+};
+
 #endif

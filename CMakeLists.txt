@@ -10,6 +10,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(out 
     src/main.cpp
+    src/helper.cpp
     src/color.cpp
     src/ray.cpp
     src/sphere.cpp
