@@ -3,6 +3,7 @@
 #include <random>
 
 #include "ray.hpp"
+#include "helper.hpp"
 #include "camera.hpp"
 #include "material.hpp"
 
@@ -53,16 +54,22 @@ void camera::initialize() {
 
     pixel_samples_scale = 1.0 / samples_per_pixel;
 
-    center = arma::vec3({0,0,0});
+    center = lookfrom;
     
     // viewport dimensions
-    auto focal_length = 1.0;
-    auto viewport_height = 2.0;
+    auto focal_length = arma::norm(lookfrom-lookat, 2);
+    auto theta = vfov*arma::datum::pi/180.0;
+    auto h = std::tan(theta/2);
+    auto viewport_height = 2*h*focal_length;
     auto viewport_width = viewport_height * (double(image_width)/image_height);
 
+    w = arma::normalise(lookfrom-lookat);
+    u = arma::normalise(cross(vup, w));
+    v = cross(w,u);
+
     // vectors across the horizontal and down the vertical viewport edges
-    arma::vec3 viewport_u = {viewport_width, 0, 0};
-    arma::vec3 viewport_v = {0, -viewport_height, 0};
+    arma::vec3 viewport_u = viewport_width*u;
+    arma::vec3 viewport_v = viewport_height*-v;
     
     // alculate the horizontal and vertical delta vectors from pixel to pixel.
     pixel_delta_u = viewport_u / image_width;
@@ -70,7 +77,8 @@ void camera::initialize() {
 
     // location of upper left pixel
     auto viewport_upper_left = center 
-        - arma::vec3({0,0,focal_length}) - viewport_u/2 -viewport_v/2;
+        - (focal_length*w) 
+        - viewport_u/2 -viewport_v/2;
     pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 }
 
