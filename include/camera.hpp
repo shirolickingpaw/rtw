@@ -12,6 +12,7 @@ class camera {
         double aspect_ratio = 1.0; // default
         int image_width = 1024;
         int samples_per_pixel = 10;
+        int max_depth = 10;
         
         void render(const hittable& world);
     private:
@@ -25,7 +26,7 @@ class camera {
         void initialize();
         arma::vec3 sample_square() const; 
 
-        arma::vec3 ray_color(const ray& r, const hittable& world) const;
+        arma::vec3 ray_color(const ray& r, int depth, const hittable& world) const;
         ray get_ray(int i, int j) const;
 };
 

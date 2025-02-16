@@ -5,10 +5,39 @@
 #include "ray.hpp"
 #include "camera.hpp"
 
-arma::vec3 camera::ray_color(const ray& r, const hittable& world) const {
+arma::vec3 camera::ray_color(const ray& r, int depth, const hittable& world) const {
+    if (depth <= 0)
+        return arma::vec3({0,0,0});
     hit_record rec;
-    if (world.hit(r, interval(0, arma::datum::inf), rec))
-        return 0.5 * (rec.normal + arma::vec3({1,1,1}));
+
+    // the following code highly depend on the diffusion model you choose
+    if (world.hit(r, interval(0.001, arma::datum::inf), rec)) {
+        arma::vec3 direction;
+        arma::vec3 on_unit_sphere;
+        while (true) {
+            int upper_lim = 1;
+            int lower_lim = -1;
+            // [-1, 1)
+            arma::vec3 p = lower_lim 
+                + (upper_lim-lower_lim) 
+                * arma::vec3(arma::randu<arma::vec>(3));
+
+            auto lensq = arma::dot(p,p);
+            if (1e-160 < lensq && lensq <= 1) {
+                on_unit_sphere = p/std::sqrt(lensq);
+                break;
+            }
+        }
+
+        if (arma::dot(on_unit_sphere, rec.normal) > 0.0) {
+            direction = on_unit_sphere;
+        } else {
+            direction = -on_unit_sphere;
+        }
+
+        // 0.5 here is reflectance 0.1 for a darker picture 0.9 for a lighter picture
+        return 0.5 * ray_color(ray(rec.p, direction), depth-1,  world);
+    }
 
     arma::vec3 unit_direction = arma::normalise(r.direction());
     auto a = 0.5 * (unit_direction[1] + 1.0);
@@ -26,7 +55,7 @@ void camera::render(const hittable& world) {
             arma::vec3 pixel_color = {0,0,0};
             for (int k : std::views::iota(0, samples_per_pixel)) {
                 ray r = get_ray(i, j);
-                pixel_color += ray_color(r, world);
+                pixel_color += ray_color(r, max_depth, world);
             }
             write_color(pixel_samples_scale * pixel_color);
         }
